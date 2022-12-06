@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ */
 package algos.graph;
 
 import java.util.HashMap;
@@ -8,8 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Dijkstra {
-	
-	
+
 	Map<String, Double> arcs = null;
 	
 	public Dijkstra(Map<String, Double> arcs) {
