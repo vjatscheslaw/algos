@@ -3,17 +3,17 @@ package algos.graph;
 /**
  * Edge is a class representing a connection between to vertices of a graph
  */
-public class Edge {
+public class Arc {
 
     public final int from, to;
 
-    public Edge(int from, int to) {
+    public Arc(int from, int to) {
         this.from = from;
         this.to = to;
     }
 
-    public Edge reversed() {
-        return new Edge(to, from);
+    public Arc reversed() {
+        return new Arc(to, from);
     }
 
     @Override
@@ -21,10 +21,10 @@ public class Edge {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Edge edge = (Edge) o;
+        Arc arc = (Arc) o;
 
-        if (from != edge.from) return false;
-        return to == edge.to;
+        if (from != arc.from) return false;
+        return to == arc.to;
     }
 
     @Override

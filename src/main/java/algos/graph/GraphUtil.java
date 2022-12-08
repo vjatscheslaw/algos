@@ -14,12 +14,12 @@ public class GraphUtil {
      *
      * @param graph the graph object
      * @param start an index of an edge where we start our journey from
+     * @param <V>   generic vertex type
+     * @param <E>   generic edge (rib, arc) type
+     * @param <T>   generic graph implementation type
      * @return a minimum spanning tree of the graph
-     * @param <V> generic vertex type
-     * @param <E> generic edge (rib, arc) type
-     * @param <T> generic graph implementation type
      */
-    public static <V, E extends WeightedEdge, T extends WeightedGraph<V, E>> List<E> jarnik(T graph, int start) {
+    public static <V, E extends WeightedArc, T extends WeightedIncidentalityListBasedGraph<V, E>> List<E> jarnik(T graph, int start) {
         LinkedList<E> result = new LinkedList<>();
 
         if (start < 0 || start > (graph.getVertexCount() - 1)) {
@@ -30,7 +30,7 @@ public class GraphUtil {
 
         IntConsumer visit = index -> {
             visited[index] = true;
-            for (E edge : graph.edgesOf(index)) if (!visited[edge.to]) pq.offer(edge);
+            for (E edge : graph.arcsOf(index)) if (!visited[edge.to]) pq.offer(edge);
         };
 
         visit.accept(start);
@@ -47,16 +47,17 @@ public class GraphUtil {
     /**
      * The method returns a String representation of the path on the given graph
      *
-     * @param path list of interconnected edges of the graph
+     * @param path  list of interconnected edges of the graph
      * @param graph the graph
+     * @param <T>   generic vertex type
+     * @param <V>   generic graph implementation type
+     * @param <E>   generic edge (rib, arc) type
      * @return String representation of the path
-     * @param <T> generic vertex type
-     * @param <V> generic graph implementation type
-     * @param <E> generic edge (rib, arc) type
      */
-    public static <T, V extends WeightedGraph<T, E>, E extends WeightedEdge> String printWeightedPath(List<E> path, V graph) {
+    public static <T, V extends WeightedIncidentalityListBasedGraph<T, E>, E extends WeightedArc> String printWeightedPath(List<E> path, V graph) {
         StringBuilder sb = new StringBuilder();
-        for (E edge : path) sb.append(graph.vertexAt(edge.from)).append(" =").append(edge.weight).append("=> ").append(graph.vertexAt(edge.to)).append("\n");
+        for (E edge : path)
+            sb.append(graph.vertexAt(edge.from)).append(" =").append(edge.weight).append("=> ").append(graph.vertexAt(edge.to)).append("\n");
         return sb.toString();
     }
 
@@ -77,7 +78,7 @@ public class GraphUtil {
         }
     }
 
-    public static final class DijkstraResult<E extends WeightedEdge> {
+    public static final class DijkstraResult<E extends WeightedArc> {
         public final double[] distances;
         public final Map<Integer, E> pathMap;
 
@@ -91,12 +92,12 @@ public class GraphUtil {
      * The method calculates the shortest distance from the root node to any other node of the given graph
      *
      * @param root - the root node
+     * @param <N>  - graph node generic type
+     * @param <T>  - graph edge (arc, rib) generic type
+     * @param <G>  - generic graph implementation type
      * @return an encapsulated result of the calculation
-     * @param <N> - graph node generic type
-     * @param <T> - graph edge (arc, rib) generic type
-     * @param <G> - generic graph implementation type
      */
-    public static <N, T extends WeightedEdge, G extends WeightedGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
+    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListBasedGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
         int start = graph.indexOf(root);
         double[] distances = new double[graph.getVertexCount()];
         distances[start] = .0d;
@@ -109,7 +110,7 @@ public class GraphUtil {
         while (!pQueue.isEmpty()) {
             int nodeIndex = pQueue.poll().vertex;
             double nodeDistance = distances[nodeIndex];
-            for (T wEdge : graph.edgesOf(nodeIndex)) {
+            for (T wEdge : graph.arcsOf(nodeIndex)) {
                 double oldDistance = distances[wEdge.to];
                 double pathWeight = wEdge.weight + nodeDistance;
                 if (!visited[wEdge.to] || (oldDistance > pathWeight)) {
@@ -123,25 +124,23 @@ public class GraphUtil {
         return new DijkstraResult<>(distances, pathMap);
     }
 
-    public static <N, T extends WeightedEdge, G extends WeightedGraph<N, T>> Map<N, Double> distanceArrayToDistanceMap(double[] distances, G graph) {
+    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListBasedGraph<N, T>> Map<N, Double> distanceArrayToDistanceMap(double[] distances, G graph) {
         HashMap<N, Double> distanceMap = new HashMap<>();
         for (int i = 0; i < distances.length; i++) distanceMap.put(graph.vertexAt(i), distances[i]);
         return distanceMap;
     }
 
-    public static List<WeightedEdge> pathMapToPath(int start, int end, Map<Integer, WeightedEdge> pathMap) {
+    public static List<WeightedArc> pathMapToPathList(int start, int end, Map<Integer, WeightedArc> pathMap) {
         if (pathMap.size() == 0) return List.of();
-        LinkedList<WeightedEdge> path = new LinkedList<>();
-        WeightedEdge edge = pathMap.get(end);
-        path.add(edge);
-        while (edge.from != start) {
-            edge = pathMap.get(edge.from);
-            path.add(edge);
+        LinkedList<WeightedArc> path = new LinkedList<>();
+        WeightedArc wArc = pathMap.get(end);
+        path.add(wArc);
+        while (wArc.from != start) {
+            wArc = pathMap.get(wArc.from);
+            path.add(wArc);
         }
         Collections.reverse(path);
         return path;
     }
-
-
 
 }

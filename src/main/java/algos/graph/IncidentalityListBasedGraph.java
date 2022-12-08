@@ -4,26 +4,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Graph<V, E extends Edge> {
+/**
+ * Generic implementation of an adjacency list based graph.
+ * Incidentality list is an ArrayList of vertices which have an index matching to lists of their arcs,
+ * which are themselves contained in a separate ArrayList for the reason of index matching.
+ * Each of the arcs must have two index references to their vertices (from, to)
+ *
+ * @param <V> generic vertex type
+ * @param <E> generified arc type
+ */
+public class IncidentalityListBasedGraph<V, E extends Arc> {
     private ArrayList<V> vertices = new ArrayList<>();
-    protected ArrayList<ArrayList<E>> edges = new ArrayList<>();
+    protected ArrayList<List<E>> arcs = new ArrayList<>();
 
-    public Graph(ArrayList<V> vertices) {
+    public IncidentalityListBasedGraph(ArrayList<V> vertices) {
         this.vertices = vertices;
-        for (V vertex : vertices) this.edges.add(new ArrayList<E>());
+        for (V vertex : vertices) this.arcs.add(new ArrayList<E>());
     }
 
     public int getVertexCount() {
         return this.vertices.size();
     }
 
-    public int getEdgeCount() {
-        return this.edges.stream().mapToInt(ArrayList::size).sum();
+    public int getArcCount() {
+        return this.arcs.stream().mapToInt(List::size).sum();
     }
 
     public int addVertex(V vertex) {
         this.vertices.add(vertex);
-        this.edges.add(new ArrayList<>());
+        this.arcs.add(new ArrayList<>());
         return getVertexCount() - 1;
     }
 
@@ -36,7 +45,7 @@ public class Graph<V, E extends Edge> {
     }
 
     public List<V> neighborsOf(int index) {
-        return this.edges.get(index).stream()
+        return this.arcs.get(index).stream()
                 .map(edge -> vertexAt(edge.to))
                 .toList();
     }
@@ -45,12 +54,12 @@ public class Graph<V, E extends Edge> {
         return neighborsOf(indexOf(vertex));
     }
 
-    public List<E> edgesOf(int index) {
-        return this.edges.get(index);
+    public List<E> arcsOf(int index) {
+        return this.arcs.get(index);
     }
 
-    public List<E> edgesOf(V vertex) {
-        return edgesOf(indexOf(vertex));
+    public List<E> arcsOf(V vertex) {
+        return arcsOf(indexOf(vertex));
     }
 
     @Override
