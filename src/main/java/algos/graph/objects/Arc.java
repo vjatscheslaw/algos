@@ -1,7 +1,7 @@
 package algos.graph;
 
 /**
- * Edge is a class representing a connection between to vertices of a graph
+ * Arc is a representation of a connection between two nodes of a directed graph.
  */
 public class Arc {
 
