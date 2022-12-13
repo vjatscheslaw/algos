@@ -3,10 +3,7 @@
  */
 package algos.graph;
 
-import algos.graph.objects.Graph;
-import algos.graph.objects.Rib;
-import algos.graph.objects.WeightedArc;
-import algos.graph.objects.WeightedRib;
+import algos.graph.objects.*;
 
 import java.util.*;
 import java.util.function.IntConsumer;
@@ -91,7 +88,7 @@ public class GraphUtil {
         }
     }
 
-    public static final class DijkstraResult<E extends WeightedArc> {
+    public static final class DijkstraResult<E extends Rib> {
         public final double[] distances;
         public final Map<Integer, E> pathMap;
 
@@ -110,7 +107,7 @@ public class GraphUtil {
      * @param <G>  - generic graph implementation type
      * @return an encapsulated result of the calculation
      */
-    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListDirectedGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
+    public static <N, T extends WeightedRib, G extends WeightedAdjacencyMatrixGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
         int start = graph.indexOf(root);
         double[] distances = new double[graph.getNodeCount()];
         distances[start] = .0d;
@@ -123,7 +120,7 @@ public class GraphUtil {
         while (!pQueue.isEmpty()) {
             int nodeIndex = pQueue.poll().vertex;
             double nodeDistance = distances[nodeIndex];
-            for (T wEdge : graph.arcsOf(nodeIndex)) {
+            for (T wEdge : graph.ribsOf(nodeIndex)) {
                 double oldDistance = distances[wEdge.to];
                 double pathWeight = wEdge.weight + nodeDistance;
                 if (!visited[wEdge.to] || (oldDistance > pathWeight)) {

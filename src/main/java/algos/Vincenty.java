@@ -9,7 +9,7 @@ package algos;
 ### Vincenty Formula http://www.movable-type.co.uk/scripts/latlong-vincenty.html
 */
 
-public final class Distance
+public final class Vincenty
 {
     /**
      * The method calculates metric distance between two GPS points by Vincenty algorithm

@@ -1,8 +1,9 @@
 /*
  * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
-package algos.graph;
+package algos.graph.specialized;
 
+import algos.graph.WeightedAdjacencyMatrixDirectedGraph;
 import algos.graph.exception.GraphInstantiationException;
 import algos.graph.objects.City;
 import algos.graph.objects.CityNode;
@@ -20,7 +21,7 @@ public class CityWeightedAdjacencyMatrixDirectedGraph<N extends CityNode, A exte
 
     public int indexOf(City city) {
         for (int i = 0; i < this.getNodes().length; i++) {
-            if (this.getNodes()[i].getCity().equals(city)) return i;
+            if (this.getNodes()[i].getCity() == city) return i;
         }
         return -1;
     }

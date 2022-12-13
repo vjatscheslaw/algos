@@ -3,13 +3,13 @@
  */
 package algos.graph.objects;
 
-public class CrossroadsVasilevskyNode {
+public class CrossroadsNode {
     private Crossroad crossroad;
 
-    public CrossroadsVasilevskyNode(Crossroad c) {
+    public CrossroadsNode(Crossroad c) {
         this.crossroad = c;
     }
-    public Crossroad getCrossroadVasilevsky() {
+    public Crossroad getCrossroad() {
         return crossroad;
     }
 
@@ -19,9 +19,9 @@ public class CrossroadsVasilevskyNode {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
 
-        CrossroadsVasilevskyNode cityNode = (CrossroadsVasilevskyNode) o;
+        CrossroadsNode cityNode = (CrossroadsNode) o;
 
-        return crossroad == cityNode.getCrossroadVasilevsky();
+        return crossroad == cityNode.getCrossroad();
     }
 
     @Override

@@ -54,7 +54,6 @@ public class IncidentalityListGraph<V, E extends Rib> implements Graph<V, E> {
         return this.nodes.indexOf(vertex);
     }
 
-    //TODO make an annotation
     private void updateRibs() {
         this.ribs = this.incidentality.stream().flatMap(Set::stream).collect(Collectors.toSet());
     }

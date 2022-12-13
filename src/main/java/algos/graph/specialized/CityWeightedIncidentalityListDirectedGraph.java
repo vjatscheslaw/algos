@@ -1,8 +1,9 @@
 /*
  * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
-package algos.graph;
+package algos.graph.specialized;
 
+import algos.graph.WeightedIncidentalityListDirectedGraph;
 import algos.graph.objects.City;
 import algos.graph.objects.CityNode;
 import algos.graph.objects.WeightedArc;
@@ -15,7 +16,7 @@ public class CityWeightedIncidentalityListDirectedGraph<N extends CityNode, A ex
     }
 
     public int indexOf(City city) {
-        for (int i = 0; i < this.getNodes().size(); i++) if (this.getNodes().get(i).getCity().equals(city)) return i;
+        for (int i = 0; i < this.getNodes().size(); i++) if (this.getNodes().get(i).getCity() == city) return i;
         return -1;
     }
 }

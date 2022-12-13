@@ -5,24 +5,24 @@ package algos.graph.specialized;
 
 import algos.graph.WeightedAdjacencyMatrixGraph;
 import algos.graph.exception.GraphInstantiationException;
-import algos.graph.objects.City;
-import algos.graph.objects.CityNode;
+import algos.graph.objects.Crossroad;
+import algos.graph.objects.CrossroadsNode;
 import algos.graph.objects.WeightedRib;
 
-public class CityWeightedAdjacencyMatrixGraph<N extends CityNode, A extends WeightedRib> extends WeightedAdjacencyMatrixGraph<N, A> {
-    public CityWeightedAdjacencyMatrixGraph(N[] vertices, double[][] adjacency) throws GraphInstantiationException {
+public class CrossroadsWeightedAdjacencyMatrixGraph<N extends CrossroadsNode, A extends WeightedRib> extends WeightedAdjacencyMatrixGraph<N, A> {
+
+    public CrossroadsWeightedAdjacencyMatrixGraph(N[] vertices, double[][] adjacency) throws GraphInstantiationException {
         super(vertices, adjacency);
     }
 
     @Override
-    public int indexOf(CityNode node) {
-        return this.indexOf(node.getCity());
+    public int indexOf(CrossroadsNode node) {
+        return this.indexOf(node.getCrossroad());
     }
 
-    public int indexOf(City city) {
-        for (int i = 0; i < this.getNodes().length; i++) {
-            if (this.getNodes()[i].getCity().equals(city)) return i;
-        }
+    public int indexOf(Crossroad crossroad) {
+        for (int i = 0; i < this.getNodes().length; i++)
+            if (this.getNodes()[i].getCrossroad() == crossroad) return i;
         return -1;
     }
 }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DijkstraGraphHashtableBasedTests {
+public class DijkstraGraphHashtableTests {
 
     @Test
     public void test() {
@@ -21,8 +21,8 @@ public class DijkstraGraphHashtableBasedTests {
         arcs.put("B->FINISH", 5.0d);
         arcs.put("A->FINISH", 1.0d);
 
-        DijkstraGraphHashtableBased d = new DijkstraGraphHashtableBased(arcs);
-        System.out.println(d.findShortestPath());
+        DijkstraGraphHashtable d = new DijkstraGraphHashtable(arcs);
+        System.out.println(d.findShortestPathUsingDijkstra());
 
         Map<String, Double> arcs1 = new HashMap<>();
         arcs1.put("START->A", 5.0d);
@@ -35,8 +35,8 @@ public class DijkstraGraphHashtableBasedTests {
         arcs1.put("D->FINISH", 1.0d);
         arcs1.put("C->FINISH", 3.0d);
 
-        DijkstraGraphHashtableBased d1 = new DijkstraGraphHashtableBased(arcs1);
-        System.out.println(d1.findShortestPath());
+        DijkstraGraphHashtable d1 = new DijkstraGraphHashtable(arcs1);
+        System.out.println(d1.findShortestPathUsingDijkstra());
 
         Map<String, Double> arcs2 = new HashMap<>();
         arcs2.put("START->A", 10.0d);
@@ -45,8 +45,8 @@ public class DijkstraGraphHashtableBasedTests {
         arcs2.put("C->FINISH", 30.0d);
         arcs2.put("A->C", 20.0d);
 
-        DijkstraGraphHashtableBased d2 = new DijkstraGraphHashtableBased(arcs2);
-        System.out.println(d2.findShortestPath());
+        DijkstraGraphHashtable d2 = new DijkstraGraphHashtable(arcs2);
+        System.out.println(d2.findShortestPathUsingDijkstra());
 
         Map<String, Double> arcs3 = new HashMap<>();
         arcs3.put("START->A", 2.0d);
@@ -57,7 +57,7 @@ public class DijkstraGraphHashtableBasedTests {
         arcs3.put("A->FINISH", 2.0d);
         arcs3.put("C->FINISH", 2.0d);
 
-        Assertions.assertThrows(DijkstraValidationException.class, () -> new DijkstraGraphHashtableBased(arcs3));
+        Assertions.assertThrows(DijkstraValidationException.class, () -> new DijkstraGraphHashtable(arcs3));
 
         Map<String, Double> arcs4 = new HashMap<>();
         arcs4.put("START->A", 20.0d);
@@ -68,7 +68,7 @@ public class DijkstraGraphHashtableBasedTests {
         arcs4.put("B->BB", 4.0d);
         arcs4.put("BB->FINISH", 20.0d);
 
-        DijkstraGraphHashtableBased d3 = new DijkstraGraphHashtableBased(arcs4);
-        System.out.println(d3.findShortestPath());
+        DijkstraGraphHashtable d3 = new DijkstraGraphHashtable(arcs4);
+        System.out.println(d3.findShortestPathUsingDijkstra());
     }
 }

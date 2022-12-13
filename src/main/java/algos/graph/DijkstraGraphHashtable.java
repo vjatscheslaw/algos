@@ -14,7 +14,7 @@ import java.util.*;
  * For an unweighted graph you may want to look at Breit First Search algorithm.
  * For an undirected weighted graph you may want to look at A* algorithm.
  */
-public class DijkstraGraphHashtableBased {
+public class DijkstraGraphHashtable {
     private final Map<String, Double> arcs;
     private final Map<String, HashMap<String, Double>> parentsOnTheirChildren = new HashMap<>(); // mapping of vertex on mapping of its neighbours on their costs of reach
     private final Map<String, String> childrenOnTheirParents = new HashMap<>(); // parents are needed for the cheapest path reconstruction
@@ -22,7 +22,7 @@ public class DijkstraGraphHashtableBased {
     private final Map<String, String> visited = new HashMap<>();
     private final Set<String> vertices = new HashSet<>();
 
-    public DijkstraGraphHashtableBased(Map<String, Double> arcs) {
+    public DijkstraGraphHashtable(Map<String, Double> arcs) {
         this.arcs = arcs;
         this.validate();
     }
@@ -65,12 +65,12 @@ public class DijkstraGraphHashtableBased {
                 throw new DijkstraValidationException("Dijkstra algorithm isn't applicable to graphs with negative weights");
     }
 
-    public String findShortestPath() {
+    public String findShortestPathUsingDijkstra() {
         init();
 
         String currentNode = null;
         while (true) {
-            currentNode = getCheapestDestination(weight, visited);
+            currentNode = successor(weight, visited);
             if (currentNode == null) break;
             var currentNodeWeight = weight.get(currentNode);
             var childrenOnTheirWeights = parentsOnTheirChildren.get(currentNode);
@@ -108,7 +108,7 @@ public class DijkstraGraphHashtableBased {
      * @param visited - those who were visited shouldn't have their children's weights to be updated once again
      * @return the node cheapest to reach at the current step of the algorithm
      */
-     String getCheapestDestination(Map<String, Double> costs, Map<String, String> visited) {
+     String successor(Map<String, Double> costs, Map<String, String> visited) {
         String cheapestId = null;
         Double cheapestCost = Double.POSITIVE_INFINITY;
         for (var vertex : costs.keySet())
