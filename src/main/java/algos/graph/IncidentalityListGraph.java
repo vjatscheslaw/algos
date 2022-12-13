@@ -1,28 +1,31 @@
+/*
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
+ */
 package algos.graph;
 
-import algos.graph.objects.Arc;
-import algos.graph.objects.DirectedGraph;
-import algos.graph.objects.Node;
+import algos.graph.objects.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Generic implementation of an incidentality list based graph.
- * Incidentality list is an ArrayList of vertices which have an index matching to lists of their arcs,
- * which are themselves contained in a separate ArrayList for the reason of index matching.
- * Each of the arcs must have two index references to their vertices (from, to)
+ * Generic implementation of a graph which is based on an incidentality list.
+ * Incidentality list is an array of vertices (nodes) whose indices match
+ * sets of their ribs, contained in a ribs sets array.
+ * Each of the ribs must have strictly two index references of two connected nodes.
  *
  * @param <V> generic vertex type
- * @param <E> generified arc type
+ * @param <E> generified rib type
  */
-public class IncidentalityListDirectedGraph<V extends Node, E extends Arc> implements DirectedGraph<V, E> {
+public class IncidentalityListGraph<V, E extends Rib> implements Graph<V, E> {
     private ArrayList<V> nodes = new ArrayList<>();
-    protected ArrayList<Set<E>> arcs = new ArrayList<>();
+    private ArrayList<Set<E>> incidentality = new ArrayList<>();
+    private Set<E> ribs = new HashSet<>();
 
-    public IncidentalityListDirectedGraph(ArrayList<V> nodes) {
+    public IncidentalityListGraph(ArrayList<V> nodes) {
         this.nodes = nodes;
-        for (V vertex : nodes) this.arcs.add(new HashSet<>());
+        for (V node : nodes) this.incidentality.add(new HashSet<>());
     }
 
     @Override
@@ -30,13 +33,9 @@ public class IncidentalityListDirectedGraph<V extends Node, E extends Arc> imple
         return this.nodes.size();
     }
 
-    public int getArcCount() {
-        return this.arcs.stream().mapToInt(Set::size).sum();
-    }
-
     public int addVertex(V vertex) {
         this.nodes.add(vertex);
-        this.arcs.add(new HashSet<>());
+        this.incidentality.add(new HashSet<>());
         return getNodeCount() - 1;
     }
 
@@ -47,39 +46,57 @@ public class IncidentalityListDirectedGraph<V extends Node, E extends Arc> imple
 
     @Override
     public int getRibCount() {
-        return getArcCount();
+        return this.ribs.size() / 2;
     }
 
+    @Override
     public int indexOf(V vertex) {
         return this.nodes.indexOf(vertex);
     }
 
+    //TODO make an annotation
+    private void updateRibs() {
+        this.ribs = this.incidentality.stream().flatMap(Set::stream).collect(Collectors.toSet());
+    }
+
     @Override
     public void connectNodes(V from, V to) {
-
+        connectNodes(indexOf(from), indexOf(to));
     }
 
     @Override
     public void connectNodes(int from, int to) {
-        this.arcs.get(from).add((E) new Arc(from, to));
-        this.arcs.get(to).add((E) new Arc(to, from));
+        this.incidentality.get(from).add((E) new Rib(from, to));
+        this.incidentality.get(to).add((E) new Rib(to, from));
+        updateRibs();
     }
 
     @Override
     public void disconnectNodes(V from, V to) {
-
+        disconnectNodes(indexOf(from), indexOf(to));
     }
 
     @Override
     public void disconnectNodes(int from, int to) {
-        Set<E> arcsFrom = this.arcs.get(from);
-        Set<E> arcsTo = this.arcs.get(to);
+        this.incidentality.get(from).remove(nodeAt(to));
+        this.incidentality.get(to).remove(nodeAt(from));
+        updateRibs();
     }
 
     public Set<V> successorsOf(int index) {
-        return this.arcs.get(index).stream()
-                .map(edge -> nodeAt(edge.to))
+        return this.incidentality.get(index).stream()
+                .flatMap(edge -> Stream.of(nodeAt(edge.to), nodeAt(edge.from)))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<E> ribsOf(V node) {
+        return ribsOf(indexOf(node));
+    }
+
+    @Override
+    public Set<E> ribsOf(int index) {
+        return this.incidentality.get(index);
     }
 
     public Set<V> successorsOf(V vertex) {
@@ -87,19 +104,19 @@ public class IncidentalityListDirectedGraph<V extends Node, E extends Arc> imple
     }
 
     public Set<E> arcsOf(int index) {
-        return this.arcs.get(index);
+        return ribsOf(index);
     }
 
     public Set<E> arcsOf(V vertex) {
-        return arcsOf(indexOf(vertex));
+        return ribsOf(indexOf(vertex));
     }
 
     public ArrayList<V> getNodes() {
         return nodes;
     }
 
-    public ArrayList<Set<E>> getArcs() {
-        return arcs;
+    public ArrayList<Set<E>> getIncidentality() {
+        return incidentality;
     }
 
     @Override

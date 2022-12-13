@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
 package algos.graph;
 
 import algos.graph.exception.GraphInstantiationException;
 import algos.graph.objects.City;
 import algos.graph.objects.CityNode;
-import algos.graph.objects.WeightedArc;
+import algos.graph.objects.WeightedRib;
 
-public class CityWeightedAdjacencyMatrixDirectedGraph<N extends CityNode, A extends WeightedArc> extends WeightedAdjacencyMatrixDirectedGraph<N, A> {
-    public CityWeightedAdjacencyMatrixDirectedGraph(N[] vertices, double[][] adjacency) throws GraphInstantiationException {
+public class CityWeightedAdjacencyMatrixGraph<N extends CityNode, A extends WeightedRib> extends WeightedAdjacencyMatrixGraph<N, A> {
+    public CityWeightedAdjacencyMatrixGraph(N[] vertices, double[][] adjacency) throws GraphInstantiationException {
         super(vertices, adjacency);
     }
 

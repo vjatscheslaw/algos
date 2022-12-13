@@ -1,26 +1,25 @@
 /*
- * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
 package algos.graph.objects;
 
 /**
- * WeightedArc is a class representing a weighty connection between two vertices of a graph
+ * WeightedRib is a class representing a weighty connection between two vertices of a graph
  */
-public class WeightedArc extends Arc implements Comparable<WeightedArc> {
+public class WeightedRib extends Rib implements Comparable<WeightedRib> {
 
     public final double weight;
 
-    public WeightedArc(int from, int to, double weight) {
+    public double getWeight() {
+        return weight;
+    }
+
+    public WeightedRib(int from, int to, double weight) {
         super(from, to);
         this.weight = weight;
     }
 
-    @Override
-    public WeightedArc reversed() {
-        return new WeightedArc(to, from, this.weight);
-    }
-
-    public int compareTo(WeightedArc other) {
+    public int compareTo(WeightedRib other) {
         Double mine = this.weight;
         Double their = other.weight;
         return mine.compareTo(their);
@@ -28,7 +27,7 @@ public class WeightedArc extends Arc implements Comparable<WeightedArc> {
 
     @Override
     public String toString() {
-        return from + " " + weight + "> " + to;
+        return from + " <" + weight + "> " + to;
     }
 
 }

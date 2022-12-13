@@ -1,4 +1,7 @@
-package algos.graph;
+/*
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
+ */
+package algos.graph.objects;
 
 /**
  * WeightedArc is a class representing a weighty connection between two vertices of a graph

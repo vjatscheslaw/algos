@@ -1,22 +1,25 @@
 /*
- * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
 package algos.graph.objects;
 
 /**
- * Arc is a representation of a connection between two nodes of a directed graph.
+ * Rib is a representation of a connection between two nodes of an undirected graph.
  */
-public class Arc {
+public class Rib {
 
     public final int from, to;
 
-    public Arc(int from, int to) {
+    /**
+     * The words 'from' and 'to' don't actually mean direction here, so that you may assign them vice versa, when instantiating an object of this class.
+     * The naming 'to' and 'from' has been preserved for inheritance purpose only
+     *
+     * @param from - any of the two nodes index
+     * @param to - any other of the two nodes index
+     */
+    public Rib(int from, int to) {
         this.from = from;
         this.to = to;
-    }
-
-    public Arc reversed() {
-        return new Arc(to, from);
     }
 
     @Override
@@ -24,10 +27,10 @@ public class Arc {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Arc arc = (Arc) o;
+        Rib rib = (Rib) o;
 
-        if (from != arc.from) return false;
-        return to == arc.to;
+        if (((this.from == rib.from)&&(this.to == rib.to)) || ((this.to == rib.from)&&(this.from == rib.to))) return true;
+        return false;
     }
 
     @Override
@@ -39,6 +42,6 @@ public class Arc {
 
     @Override
     public String toString() {
-        return from + " -> " + to ;
+        return from + " --- " + to ;
     }
 }

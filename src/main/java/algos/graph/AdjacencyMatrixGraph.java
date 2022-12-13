@@ -1,32 +1,33 @@
+/*
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
+ */
 package algos.graph;
 
 import algos.graph.exception.GraphInstantiationException;
-import algos.graph.objects.Arc;
-import algos.graph.objects.DirectedGraph;
-import algos.graph.objects.Node;
+import algos.graph.objects.*;
 
 import java.util.*;
 
 /**
  * Generic implementation of an adjacency matrix based graph.
  * Adjacency matrix is a square matrix of boolean values. Both matrix dimensions are node ids
- * which are nodes matrix indices in their own turn.
- * Each of the nodes must have two arrays of index references in it: parent nodes (from-nodes) and child nodes (to-nodes).
+ * which are matrix indices in their own turn.
  * The matrix must have zeroes (false values) on its main diagonal, which means no self-looping
  *
  * @param <N> generic node type
- * @param <A> generic arc type
+ * @param <A> generic rib type
  */
-public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> implements DirectedGraph<N, A> {
+public class AdjacencyMatrixGraph<N, A extends Rib> implements Graph<N, A> {
     private boolean[][] adjacencyMatrix;
     private N[] nodes;
-    private HashSet<String> arcs;
+    private HashSet<String> ribs;
 
-    public AdjacencyMatrixDirectedGraph(N[] nodes) {
+    public AdjacencyMatrixGraph(N[] nodes) {
         this.nodes = nodes;
     }
-    public AdjacencyMatrixDirectedGraph(N[] nodes, boolean[][] adjacency) throws GraphInstantiationException {
-        reinit(nodes, adjacency);
+    public AdjacencyMatrixGraph(N[] nodes, boolean[][] adjacency) throws GraphInstantiationException {
+        this.nodes = nodes;
+        this.adjacencyMatrix = adjacency;
     }
 
     public void setAdjacencyMatrix(boolean[][] adjacencyMatrix) {
@@ -47,28 +48,25 @@ public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> impleme
 
     @Override
     public int getRibCount() {
-        return getArcCount();
-    }
-
-    public int getArcCount() {
-        if (Objects.isNull(this.arcs)) {
-            this.arcs = new HashSet<>();
+        if (Objects.isNull(this.ribs)) {
+            this.ribs = new HashSet<>();
             for (int i = 0; i < nodes.length; i++) {
                 for (int j = 0; j < nodes.length; j++) {
                     if (i == j) continue;
-                    if (getAdjacencyMatrix()[i][j]) arcs.add(i + " --> " + j);
+                    if (getAdjacencyMatrix()[i][j]) ribs.add(i + " --- " + j);
                 }
             }
         }
-        return this.arcs.size();
+        return this.ribs.size();
     }
 
-    public int addNode(N vertex, boolean[][] adjacency) throws GraphInstantiationException {
-        N[] updatedNodes = (N[]) new Node[this.nodes.length + 1];
+    public int addNode(N vertex, boolean[][] adjacency) {
+        N[] updatedNodes = (N[]) new Object[this.nodes.length + 1];
         updatedNodes[updatedNodes.length-1] = vertex;
         int oldLength = this.nodes.length;
         System.arraycopy(this.nodes, 0, updatedNodes, 0, oldLength);
-        reinit(updatedNodes, adjacency);
+        this.nodes = updatedNodes;
+        this.adjacencyMatrix = adjacency;
         return oldLength;
     }
 
@@ -76,20 +74,39 @@ public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> impleme
         return this.nodes[index];
     }
 
+    //TODO maybe it would be cheaper to have a hashtable for an O(1) search?
     public int indexOf(N node) {
-        for (int i = 0; i < nodes.length; i++) if (nodes[i] == node) return i;
+        for (int i = 0; i < this.nodes.length; i++) if (nodes[i] == node) return i;
         return -1;
     }
 
     @Override
-    public List<N> successorsOf(int index) {
-        List<N> successors = new LinkedList<>();
-        for (int i = 0; i < getAdjacencyMatrix().length; i++) if (getAdjacencyMatrix()[index][i]) successors.add(nodes[i]);
+    public Set<A> ribsOf(N node) {
+        return ribsOf(indexOf(node));
+    }
+
+    @Override
+    public Set<A> ribsOf(int index) {
+        Set<A> a = new HashSet<>();
+        for (int i = 0; i < getAdjacencyMatrix().length; i++) {
+            if (getAdjacencyMatrix()[index][i]) a.add((A) new Rib(index, i));
+            if (getAdjacencyMatrix()[i][index]) a.add((A) new Rib(i, index));
+        }
+        return a;
+    }
+
+    @Override
+    public Set<N> successorsOf(int index) {
+        Set<N> successors = new HashSet<>();
+        for (int i = 0; i < getAdjacencyMatrix().length; i++)
+            if (getAdjacencyMatrix()[index][i] || getAdjacencyMatrix()[i][index]) {
+                successors.add(nodes[i]);
+            }
         return successors;
     }
 
     @Override
-    public List<N> successorsOf(N vertex) {
+    public Set<N> successorsOf(N vertex) {
         return successorsOf(indexOf(vertex));
     }
     @Override
@@ -100,6 +117,7 @@ public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> impleme
     @Override
     public void connectNodes(int one, int two) {
         getAdjacencyMatrix()[one][two] = true;
+        getAdjacencyMatrix()[two][one] = true;
     }
 
     @Override
@@ -110,19 +128,7 @@ public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> impleme
     @Override
     public void disconnectNodes(int one, int two) {
         getAdjacencyMatrix()[one][two] = false;
-    }
-
-    public List<A> arcsOf(int index) {
-        List<A> a = new LinkedList<>();
-        for (int i = 0; i < getAdjacencyMatrix().length; i++) {
-            if (getAdjacencyMatrix()[index][i]) a.add((A) new Arc(index, i));
-            if (getAdjacencyMatrix()[i][index]) a.add((A) new Arc(i, index));
-        }
-        return a;
-    }
-
-    public List<A> arcsOf(N node) {
-        return arcsOf(indexOf(node));
+        getAdjacencyMatrix()[two][one] = false;
     }
 
     @Override
@@ -132,50 +138,4 @@ public class AdjacencyMatrixDirectedGraph<N extends Node, A extends Arc> impleme
             sb.append(nodeAt(i)).append(" -> ").append(Arrays.toString(successorsOf(i).toArray())).append(System.lineSeparator());
         return sb.toString();
     }
-
-    private void reinit(N[] nodes, boolean[][] adjacency) throws GraphInstantiationException {
-        this.nodes = nodes;
-        setAdjacencyMatrix(adjacency);
-
-//        this.graph = new boolean[nodes.length][nodes.length];
-//        for (int i = 0; i < graph.length; i++) {
-//            for (int fromIndex : nodes[i].getFromNodes()) {
-//                if (fromIndex == i) throw new GraphInstantiationException("Self loops aren't allowed. Self-referencing nodes aren't acceptable.");
-//                graph[i][fromIndex] = true;
-//            }
-//            for (int toIndex : nodes[i].getToNodes()) {
-//                if (toIndex == i) throw new GraphInstantiationException("Self loops aren't allowed. Self-referencing nodes aren't acceptable.");
-//                graph[i][toIndex] = true;
-//            }
-//        }
-//
-//        this.arcs = new HashSet<>();
-//        for (int i = 0; i < nodes.length; i++) {
-//            for (int fromIndex : nodes[i].getFromNodes()) arcs.add(i +"=>"+ fromIndex);
-//            for (int toIndex : nodes[i].getToNodes()) arcs.add(i +"=>"+ toIndex);
-//        }
-
-//        validate(nodes, arcs);
-    }
-
-//    private void validate (DirectedNode[] nodes, HashSet<String> arcs) throws GraphInstantiationException {
-//        validate(nodes, arcs.stream().map(s -> {
-//            String[] txt = s.split("=>");
-//            return new Arc(Integer.parseInt(txt[0]), Integer.parseInt(txt[1]));
-//        }).toArray(Arc[]::new));
-//    }
-//
-//    private void validate(DirectedNode[] nodes, Arc[] arcs) throws GraphInstantiationException {
-//        HashMap<Integer, DirectedNode> mapNodeIndicesOnTheirObjects = Arrays.stream(nodes).collect(Collectors.toMap(
-//                Node::getId,
-//                dNode -> dNode,
-//                (dNode1, dNode2) ->
-//                        new DirectedNode(
-//                                dNode1.getId(),
-//                                IntStream.concat(Arrays.stream(dNode1.getFromNodes()), Arrays.stream(dNode2.getFromNodes())).toArray(),
-//                                IntStream.concat(Arrays.stream(dNode1.getToNodes()), Arrays.stream(dNode2.getToNodes())).toArray()),
-//                HashMap::new));
-//        Set<Integer> nodeIndicesOfArcs = Arrays.stream(arcs).flatMap((Arc a) -> Arrays.stream(new Integer[]{a.from, a.to})).collect(Collectors.toSet());
-//        if (nodeIndicesOfArcs.size() > mapNodeIndicesOnTheirObjects.keySet().size()) throw new GraphInstantiationException("Some nodes are missing from the instantiation array");
-//    }
 }

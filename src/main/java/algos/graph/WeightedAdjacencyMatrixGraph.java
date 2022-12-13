@@ -1,22 +1,20 @@
 /*
- * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
 package algos.graph;
 
 import algos.graph.exception.GraphInstantiationException;
-import algos.graph.objects.Node;
-import algos.graph.objects.WeightedArc;
 import algos.graph.objects.WeightedGraph;
+import algos.graph.objects.WeightedRib;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-public class WeightedAdjacencyMatrixDirectedGraph<N extends Node, A extends WeightedArc> extends AdjacencyMatrixDirectedGraph<N, A> implements WeightedGraph<N, A> {
+public class WeightedAdjacencyMatrixGraph<N, A extends WeightedRib> extends AdjacencyMatrixGraph<N, A> implements WeightedGraph<N, A> {
 
     private double[][] adjacencyMatrix;
 
-    public WeightedAdjacencyMatrixDirectedGraph(N[] nodes, double[][] adjacency) throws GraphInstantiationException {
+    public WeightedAdjacencyMatrixGraph(N[] nodes, double[][] adjacency) throws GraphInstantiationException {
         super(nodes);
         if (adjacency.length != adjacency[0].length)
             throw new GraphInstantiationException("An adjacency matrix graph must have a square matrix because both dimensions are node indices");
@@ -51,6 +49,7 @@ public class WeightedAdjacencyMatrixDirectedGraph<N extends Node, A extends Weig
     public void connectNodes(int from, int to, double weight) {
         if (weight == .0d) throw new IllegalArgumentException("Zero weight means no connection.");
         this.adjacencyMatrix[from][to] = weight;
+        this.adjacencyMatrix[to][from] = weight;
     }
 
     @Override
@@ -61,25 +60,48 @@ public class WeightedAdjacencyMatrixDirectedGraph<N extends Node, A extends Weig
     @Override
     public void disconnectNodes(int from, int to) {
         this.adjacencyMatrix[from][to] = .0d;
+        this.adjacencyMatrix[to][from] = .0d;
     }
 
     @Override
-    public List<N> successorsOf(int index) {
-        List<N> successors = new LinkedList<>();
-        for (int i = 0; i < getAdjacencyMatrixWeighted().length; i++) if (getAdjacencyMatrixWeighted()[index][i] > .0d || getAdjacencyMatrixWeighted()[index][i] < .0d) successors.add(getNodes()[i]);
+    public Set<N> successorsOf(int index) {
+        Set<N> successors = new HashSet<>();
+        for (int i = 0; i < getAdjacencyMatrixWeighted().length; i++)
+            if (getAdjacencyMatrixWeighted()[index][i] != .0d || getAdjacencyMatrixWeighted()[i][index] != .0d) {
+                successors.add(getNodes()[i]);
+            }
         return successors;
     }
 
     @Override
-    public List<N> successorsOf(N vertex) {
+    public Set<N> successorsOf(N vertex) {
         return successorsOf(indexOf(vertex));
     }
 
     @Override
+    public Set<A> ribsOf(int index) {
+        Set<A> a = new HashSet<>();
+        for (int i = 0; i < getAdjacencyMatrixWeighted().length; i++) {
+            if (getAdjacencyMatrixWeighted()[index][i] != .0d)
+                a.add((A) new WeightedRib(index, i, getAdjacencyMatrixWeighted()[index][i]));
+            if (getAdjacencyMatrixWeighted()[i][index] != .0d)
+                a.add((A) new WeightedRib(i, index, getAdjacencyMatrixWeighted()[i][index]));
+        }
+        return a;
+    }
+
+    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("WeightedAdjacencyMatrixDirectedGraph{");
-        sb.append("graph=").append(Arrays.toString(adjacencyMatrix));
-        sb.append('}');
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            sb.append(nodeAt(i).toString()).append(" >>> ");
+            for (int y = 0; y < adjacencyMatrix.length; y++) {
+                var w = adjacencyMatrix[i][y];
+                if (w != .0d)
+                    sb.append(nodeAt(y).toString()).append("(").append(w).append("); ");
+            }
+            sb.append(System.lineSeparator());
+        }
         return sb.toString();
     }
 }

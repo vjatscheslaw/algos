@@ -1,15 +1,15 @@
-package algos.graph;
+/*
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
+ */
+package algos.graph.objects;
 
 /**
- * Arc is a representation of a connection between two nodes of a directed graph.
+ * Arc is a representation of a one way connection between two nodes of an oriented (directed) graph.
  */
-public class Arc {
-
-    public final int from, to;
+public class Arc extends Rib {
 
     public Arc(int from, int to) {
-        this.from = from;
-        this.to = to;
+        super(from, to);
     }
 
     public Arc reversed() {
@@ -23,19 +23,13 @@ public class Arc {
 
         Arc arc = (Arc) o;
 
-        if (from != arc.from) return false;
-        return to == arc.to;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = from;
-        result = 31 * result + to;
-        return result;
+        if (this.from != arc.from) return false;
+        return this.to == arc.to;
     }
 
     @Override
     public String toString() {
-        return from + " -> " + to ;
+        return from + " --> " + to ;
     }
+
 }

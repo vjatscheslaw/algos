@@ -1,7 +1,12 @@
 /*
- * Copyright (c) 2022. This code was written by Viacheslav Mikhailov. You may contact him (me) via email taleskeeper@yandex.ru
+ * Copyright © 2022. This code's author is Viacheslav Mikhailov (mikhailowvw@gmail.com)
  */
 package algos.graph;
+
+import algos.graph.objects.Graph;
+import algos.graph.objects.Rib;
+import algos.graph.objects.WeightedArc;
+import algos.graph.objects.WeightedRib;
 
 import java.util.*;
 import java.util.function.IntConsumer;
@@ -10,33 +15,41 @@ public class GraphUtil {
 
     /**
      * This algorithm is also known as Robert C. Prim's algorithm (1957), though firstly invented by Vojtech Jarnik in 1930
-     * The algorithm returns a minimum spanning tree of the graph as a list of edges
+     * The algorithm returns a minimum spanning tree of the graph as a list of arcs
      *
      * @param graph the graph object
-     * @param start an index of an edge where we start our journey from
-     * @param <V>   generic vertex type
+     * @param start an index of a vertex where we want to start our journey from
+     * @param <V>   generic vertex (node) type
      * @param <E>   generic edge (rib, arc) type
      * @param <T>   generic graph implementation type
      * @return a minimum spanning tree of the graph
      */
-    public static <V, E extends WeightedArc, T extends WeightedIncidentalityListBasedGraph<V, E>> List<E> jarnik(T graph, int start) {
+    public static <V, E extends WeightedRib, T extends Graph<V, E>> List<E> jarnik(T graph, int start) {
         LinkedList<E> result = new LinkedList<>();
 
-        if (start < 0 || start > (graph.getVertexCount() - 1)) {
-            return result;
-        }
+        if (start < 0 || start > (graph.getNodeCount() - 1))
+            throw new IllegalArgumentException("No node of the graph may have negative index. Bad index was " + start);
+
         final PriorityQueue<E> pq = new PriorityQueue<>();
-        boolean[] visited = new boolean[graph.getVertexCount()];
+        boolean[] visited = new boolean[graph.getNodeCount()];
 
         IntConsumer visit = index -> {
             visited[index] = true;
-            for (E edge : graph.arcsOf(index)) if (!visited[edge.to]) pq.offer(edge);
+            for (E edge : graph.ribsOf(index))
+                if (!visited[edge.to] || !visited[edge.from]) pq.offer(edge);
         };
 
         visit.accept(start);
         while (!pq.isEmpty()) {
             E edge = pq.poll();
-            if (visited[edge.to]) continue;
+            if (visited[edge.to]) {
+                if (visited[edge.from]) continue;
+                else {
+                    result.add(edge);
+                    visit.accept(edge.from);
+                    continue;
+                }
+            }
             result.add(edge);
             visit.accept(edge.to);
         }
@@ -54,10 +67,10 @@ public class GraphUtil {
      * @param <E>   generic edge (rib, arc) type
      * @return String representation of the path
      */
-    public static <T, V extends WeightedIncidentalityListBasedGraph<T, E>, E extends WeightedArc> String printWeightedPath(List<E> path, V graph) {
+    public static <T, V extends WeightedIncidentalityListDirectedGraph<T, E>, E extends WeightedArc> String printWeightedPath(List<E> path, V graph) {
         StringBuilder sb = new StringBuilder();
         for (E edge : path)
-            sb.append(graph.vertexAt(edge.from)).append(" =").append(edge.weight).append("=> ").append(graph.vertexAt(edge.to)).append("\n");
+            sb.append(graph.nodeAt(edge.from)).append(" =").append(edge.weight).append("=> ").append(graph.nodeAt(edge.to)).append("\n");
         return sb.toString();
     }
 
@@ -97,11 +110,11 @@ public class GraphUtil {
      * @param <G>  - generic graph implementation type
      * @return an encapsulated result of the calculation
      */
-    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListBasedGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
+    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListDirectedGraph<N, T>> DijkstraResult<T> dijkstra(N root, G graph) {
         int start = graph.indexOf(root);
-        double[] distances = new double[graph.getVertexCount()];
+        double[] distances = new double[graph.getNodeCount()];
         distances[start] = .0d;
-        boolean[] visited = new boolean[graph.getVertexCount()];
+        boolean[] visited = new boolean[graph.getNodeCount()];
         visited[start] = true;
         HashMap<Integer, T> pathMap = new HashMap<>();
         PriorityQueue<DijkstraNode> pQueue = new PriorityQueue<>();
@@ -124,9 +137,9 @@ public class GraphUtil {
         return new DijkstraResult<>(distances, pathMap);
     }
 
-    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListBasedGraph<N, T>> Map<N, Double> distanceArrayToDistanceMap(double[] distances, G graph) {
+    public static <N, T extends WeightedArc, G extends WeightedIncidentalityListDirectedGraph<N, T>> Map<N, Double> distanceArrayToDistanceMap(double[] distances, G graph) {
         HashMap<N, Double> distanceMap = new HashMap<>();
-        for (int i = 0; i < distances.length; i++) distanceMap.put(graph.vertexAt(i), distances[i]);
+        for (int i = 0; i < distances.length; i++) distanceMap.put(graph.nodeAt(i), distances[i]);
         return distanceMap;
     }
 
@@ -141,6 +154,18 @@ public class GraphUtil {
         }
         Collections.reverse(path);
         return path;
+    }
+
+    public static <T, G extends Rib> void print(Collection<G> connections, Graph<T, G> graph) {
+        connections.stream()
+                .map(wRib -> graph.nodeAt(wRib.from) + " ==== " + graph.nodeAt(wRib.to))
+                .forEach(System.out::println);
+    }
+
+    public static <T, R extends WeightedRib> void printWeighted(Collection<R> connections, Graph<T, R> graph) {
+        connections.stream()
+                .map(wRib -> graph.nodeAt(wRib.from) + " ==" + wRib.weight + "== " + graph.nodeAt(wRib.to))
+                .forEach(System.out::println);
     }
 
 }
